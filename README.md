@@ -1,2 +1,2 @@
-# Galeri-Y-netim
+index.html
 Araç Alım Satım
