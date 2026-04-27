@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galeri Yönetim Sistemi</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0efe9;color:#1a1a1a;min-height:100vh}
+a{color:inherit}
+
+/* HEADER */
+.header{background:#fff;border-bottom:1px solid #e5e5e0;padding:0 24px;position:sticky;top:0;z-index:100}
+.header-top{display:flex;align-items:center;gap:12px;padding:14px 0 0}
+.logo-box{width:36px;height:36px;background:#dbeafe;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-box svg{width:20px;height:20px;stroke:#1d4ed8;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logo-title{font-size:16px;font-weight:600;color:#1a1a1a}
+.logo-sub{font-size:12px;color:#888;margin-top:1px}
+.tabs{display:flex;gap:0;margin-top:12px}
+.tab-btn{padding:9px 18px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:400;color:#888;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab-btn.active{color:#1a1a1a;font-weight:600;border-bottom-color:#1a1a1a}
+.tab-btn:hover:not(.active){color:#444;border-bottom-color:#ddd}
+
+/* LAYOUT */
+.container{max-width:960px;margin:0 auto;padding:24px 20px 60px}
+.page{display:none}.page.active{display:block}
+
+/* CARDS */
+.card{background:#fff;border-radius:12px;border:1px solid #e8e8e3;padding:20px;margin-bottom:12px}
+.card-header{font-size:14px;font-weight:600;margin-bottom:16px;color:#1a1a1a}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.stat-card{background:#f8f8f4;border-radius:10px;padding:14px 16px}
+.stat-label{font-size:11px;color:#888;margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+.stat-value{font-size:22px;font-weight:700}
+.stat-value.blue{color:#1d4ed8}.stat-value.green{color:#15803d}.stat-value.red{color:#dc2626}.stat-value.amber{color:#b45309}.stat-value.gray{color:#555}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid #d1d1cc;background:#fff;cursor:pointer;font-size:13px;font-weight:500;color:#1a1a1a;transition:all .15s}
+.btn:hover{background:#f5f5f0;border-color:#bbb}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn-primary:hover{background:#333;border-color:#333}
+.btn-success{background:#f0fdf4;color:#15803d;border-color:#86efac}
+.btn-success:hover{background:#dcfce7}
+.btn-danger{color:#dc2626;border-color:#fca5a5}
+.btn-danger:hover{background:#fef2f2}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-ai{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;padding:10px 20px;font-size:14px;font-weight:600;border-radius:10px}
+.btn-ai:hover{opacity:.9}
+
+/* BADGE */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-blue{background:#dbeafe;color:#1d4ed8}
+.badge-green{background:#dcfce7;color:#15803d}
+.badge-amber{background:#fef3c7;color:#b45309}
+.badge-gray{background:#f3f3f0;color:#555}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:12px;font-weight:500;color:#555}
+.form-group input,.form-group select,.form-group textarea{padding:8px 10px;border:1px solid #d1d1cc;border-radius:8px;font-size:13px;color:#1a1a1a;background:#fff;width:100%;font-family:inherit;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.form-group textarea{resize:vertical;min-height:70px}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.form-section{background:#f8f8f4;border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid #e8e8e3}
+
+/* ARAÇ ROW */
+.arac-row{background:#fff;border-radius:12px;border:1px solid #e8e8e3;padding:16px 18px;margin-bottom:8px;transition:border-color .15s}
+.arac-row:hover{border-color:#c5c5c0}
+.arac-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.arac-info h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.arac-meta{font-size:12px;color:#888;margin-top:3px}
+.arac-prices{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:13px}
+.arac-prices span strong{font-weight:600}
+.arac-actions{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.masraf-item{display:flex;align-items:center;gap:8px;padding:5px 8px;background:#f8f8f4;border-radius:6px;margin-bottom:4px;font-size:13px}
+.masraf-item span:first-child{flex:1}
+
+/* MÜŞTERİ ROW */
+.musteri-row{background:#fff;border-radius:12px;border:1px solid #e8e8e3;padding:14px 18px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.musteri-avatar{width:40px;height:40px;border-radius:50%;background:#f0f0eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#555;flex-shrink:0}
+.musteri-info h4{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.musteri-info p{font-size:12px;color:#888;margin-top:3px}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:6px}
+.filter-btn{padding:5px 14px;border-radius:20px;border:1px solid #d1d1cc;background:#fff;cursor:pointer;font-size:12px;font-weight:500;color:#666;transition:all .15s}
+.filter-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+
+/* SATIŞ PANEL */
+.satis-panel{background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:16px 18px;margin-bottom:12px}
+.satis-panel .card-header{color:#15803d}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:48px 20px;color:#999;font-size:13px}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.4}
+
+/* AI SECTION */
+.ai-panel{background:#faf5ff;border:1px solid #d8b4fe;border-radius:12px;padding:20px;margin-bottom:16px}
+.ai-result{background:#fff;border-radius:12px;border:1px solid #e8e8e3;padding:20px;margin-top:16px;display:none}
+.ai-result.visible{display:block}
+.ai-result-header{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.ai-result-header h3{font-size:15px;font-weight:600}
+.ai-verdict{display:flex;align-items:center;gap:12px;padding:14px;border-radius:10px;margin-bottom:16px;font-weight:600;font-size:14px}
+.verdict-al{background:#dcfce7;color:#15803d;border:1px solid #86efac}
+.verdict-musait{background:#fef3c7;color:#b45309;border:1px solid #fcd34d}
+.verdict-alma{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5}
+.ai-section{margin-bottom:14px}
+.ai-section h4{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.ai-section p{font-size:13px;line-height:1.7;color:#333}
+.ai-loading{display:none;text-align:center;padding:24px;color:#7c3aed;font-size:13px}
+.ai-loading.visible{display:block}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid #e0d7ff;border-top-color:#7c3aed;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* API KEY */
+.api-key-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px}
+.api-key-box p{color:#92400e;margin-bottom:10px}
+.api-key-box .key-row{display:flex;gap:8px;align-items:center}
+.api-key-box input{flex:1;padding:7px 10px;border:1px solid #fcd34d;border-radius:7px;font-size:13px;font-family:monospace}
+.api-key-saved{color:#15803d;font-weight:600;font-size:12px;display:none}
+
+/* AI SCORE BAR */
+.score-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.score-label{font-size:12px;color:#555;width:100px;flex-shrink:0}
+.score-bar-wrap{flex:1;background:#f0f0eb;border-radius:20px;height:8px;overflow:hidden}
+.score-bar{height:100%;border-radius:20px;transition:width .6s ease}
+.score-num{font-size:12px;font-weight:600;width:30px;text-align:right;flex-shrink:0}
+
+/* TABS SCROLL */
+@media(max-width:600px){.tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:1px}.form-grid{grid-template-columns:1fr 1fr}.stat-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:400px){.form-grid{grid-template-columns:1fr}.stat-grid{grid-template-columns:1fr 1fr}}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;padding:20px}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:22px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:16px}
+
+hr.divider{border:none;border-top:1px solid #f0f0eb;margin:14px 0}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo-box">
+      <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    </div>
+    <div>
+      <div class="logo-title">Galeri Yönetim Sistemi</div>
+      <div class="logo-sub">Araç alım–satım takip</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('ozet')">Özet</button>
+    <button class="tab-btn" onclick="switchTab('araclar')">Araçlar</button>
+    <button class="tab-btn" onclick="switchTab('musteriler')">Müşteriler</button>
+    <button class="tab-btn" onclick="switchTab('degerlendir')" style="color:#7c3aed">✦ Araç Değerlendir</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ═══════════════ ÖZET ═══════════════ -->
+  <div id="page-ozet" class="page active">
+    <div class="stat-grid" id="stat-grid"></div>
+    <div class="card">
+      <div class="card-header">Son işlemler</div>
+      <div id="son-islemler"></div>
+    </div>
+    <div class="card" id="satis-ozet-card" style="display:none">
+      <div class="card-header">Satış özeti</div>
+      <div class="stat-grid" id="satis-ozet-grid"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ARAÇLAR ═══════════════ -->
+  <div id="page-araclar" class="page">
+    <div class="toolbar">
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="setFilter('hepsi',this)">Hepsi</button>
+        <button class="filter-btn" onclick="setFilter('stokta',this)">Stokta</button>
+        <button class="filter-btn" onclick="setFilter('satildi',this)">Satıldı</button>
+      </div>
+      <button class="btn btn-primary" onclick="openAracForm()">+ Araç Ekle</button>
+    </div>
+    <div id="arac-list"></div>
+  </div>
+
+  <!-- ═══════════════ MÜŞTERİLER ═══════════════ -->
+  <div id="page-musteriler" class="page">
+    <div class="toolbar">
+      <div></div>
+      <button class="btn btn-primary" onclick="openMusteriForm()">+ Müşteri Ekle</button>
+    </div>
+    <div id="musteri-list"></div>
+  </div>
+
+  <!-- ═══════════════ ARAÇ DEĞERLENDİR ═══════════════ -->
+  <div id="page-degerlendir" class="page">
+
+    <div class="api-key-box">
+      <p>🔑 Bu özellik Anthropic yapay zeka API'sini kullanır. Ücretsiz API anahtarınızı <a href="https://console.anthropic.com" target="_blank" style="color:#92400e;text-decoration:underline">console.anthropic.com</a> adresinden alabilirsiniz.</p>
+      <div class="key-row">
+        <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." oninput="checkApiKey()">
+        <button class="btn btn-sm" onclick="saveApiKey()">Kaydet</button>
+        <span class="api-key-saved" id="api-key-saved">✓ Kaydedildi</span>
+      </div>
+    </div>
+
+    <div class="ai-panel">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <span style="font-size:22px">🔍</span>
+        <div>
+          <h2 style="font-size:15px;font-weight:700;color:#6d28d9">Yapay Zeka Araç Değerlendirmesi</h2>
+          <p style="font-size:12px;color:#8b5cf6">Almayı düşündüğünüz aracı girin, AI piyasa analizi yapsın</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Marka *</label>
+          <input type="text" id="ai-marka" placeholder="ör: Toyota">
+        </div>
+        <div class="form-group">
+          <label>Model *</label>
+          <input type="text" id="ai-model" placeholder="ör: Corolla">
+        </div>
+        <div class="form-group">
+          <label>Yıl *</label>
+          <input type="number" id="ai-yil" placeholder="2019">
+        </div>
+        <div class="form-group">
+          <label>Kilometre *</label>
+          <input type="number" id="ai-km" placeholder="80000">
+        </div>
+        <div class="form-group">
+          <label>İstenen Fiyat (₺) *</label>
+          <input type="number" id="ai-fiyat" placeholder="500000">
+        </div>
+        <div class="form-group">
+          <label>Yakıt Tipi</label>
+          <select id="ai-yakit">
+            <option>Benzin</option><option>Dizel</option><option>LPG</option><option>Hibrit</option><option>Elektrik</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Vites</label>
+          <select id="ai-vites">
+            <option>Manuel</option><option>Otomatik</option><option>Yarı Otomatik</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Araç Durumu</label>
+          <select id="ai-durum">
+            <option value="hasarsiz">Hasarsız / Boyasız</option>
+            <option value="kismiboya">Kısmi Boya</option>
+            <option value="tamponboya">Tampon Boya</option>
+            <option value="hasarli">Hasarlı / Değişen Parça Var</option>
+            <option value="agirhasarli">Ağır Hasarlı</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Ek Bilgiler (opsiyonel)</label>
+        <textarea id="ai-notlar" placeholder="ör: servis geçmişi tam, 2 sahipli, lastikler yeni, klima arızası var..."></textarea>
+      </div>
+
+      <div style="text-align:center">
+        <button class="btn btn-ai" onclick="degerlendir()">✦ Yapay Zeka ile Değerlendir</button>
+      </div>
+    </div>
+
+    <div class="ai-loading" id="ai-loading">
+      <span class="spinner"></span>Araç analiz ediliyor, lütfen bekleyin...
+    </div>
+
+    <div class="ai-result" id="ai-result">
+      <div class="ai-result-header">
+        <span style="font-size:20px">🤖</span>
+        <h3>Değerlendirme Sonucu</h3>
+      </div>
+      <div id="ai-verdict-box"></div>
+      <div class="ai-section">
+        <h4>Piyasa Değeri & Fiyat Analizi</h4>
+        <p id="ai-piyasa"></p>
+      </div>
+      <hr class="divider">
+      <div class="ai-section">
+        <h4>Puan Değerlendirmesi</h4>
+        <div id="ai-puanlar"></div>
+      </div>
+      <hr class="divider">
+      <div class="ai-section">
+        <h4>Güçlü Yönler</h4>
+        <p id="ai-guclu"></p>
+      </div>
+      <div class="ai-section">
+        <h4>Riskler & Dikkat Edilmesi Gerekenler</h4>
+        <p id="ai-risk"></p>
+      </div>
+      <hr class="divider">
+      <div class="ai-section">
+        <h4>Müzakere Önerisi</h4>
+        <p id="ai-muzakere"></p>
+      </div>
+      <div class="ai-section">
+        <h4>Genel Tavsiye</h4>
+        <p id="ai-tavsiye" style="font-weight:500"></p>
+      </div>
+    </div>
+
+  </div><!-- /degerlendir -->
+</div>
+
+<!-- ═══════════════ ARAÇ FORM MODAL ═══════════════ -->
+<div class="overlay" id="arac-modal">
+  <div class="modal">
+    <h3 id="arac-modal-title">Yeni Araç</h3>
+    <input type="hidden" id="edit-arac-id">
+    <div class="form-grid">
+      <div class="form-group"><label>Marka *</label><input id="f-marka" type="text" placeholder="Toyota"></div>
+      <div class="form-group"><label>Model *</label><input id="f-model" type="text" placeholder="Corolla"></div>
+      <div class="form-group"><label>Yıl</label><input id="f-yil" type="number" placeholder="2020"></div>
+      <div class="form-group"><label>Kilometre</label><input id="f-km" type="number" placeholder="50000"></div>
+      <div class="form-group"><label>Renk</label><input id="f-renk" type="text" placeholder="Beyaz"></div>
+      <div class="form-group"><label>Alış Fiyatı (₺) *</label><input id="f-alis" type="number" placeholder="0"></div>
+      <div class="form-group"><label>Alış Tarihi</label><input id="f-alis-tarih" type="date"></div>
+      <div class="form-group"><label>Yakıt</label><select id="f-yakit"><option>Benzin</option><option>Dizel</option><option>LPG</option><option>Elektrik</option><option>Hibrit</option></select></div>
+      <div class="form-group"><label>Vites</label><select id="f-vites"><option>Manuel</option><option>Otomatik</option><option>Yarı Otomatik</option></select></div>
+    </div>
+    <div class="form-section">
+      <div style="font-size:12px;font-weight:600;color:#555;margin-bottom:10px">MASRAFLAR (Boya, Bakım, Ekspertiz...)</div>
+      <div id="masraf-listesi"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input id="m-aciklama" type="text" placeholder="Masraf açıklaması" style="flex:2;padding:7px 10px;border:1px solid #d1d1cc;border-radius:7px;font-size:13px">
+        <input id="m-tutar" type="number" placeholder="₺" style="flex:1;padding:7px 10px;border:1px solid #d1d1cc;border-radius:7px;font-size:13px">
+        <button class="btn btn-sm" onclick="addMasraf()">+ Ekle</button>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Notlar</label>
+      <textarea id="f-notlar" placeholder="Araç hakkında notlar..."></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeAracModal()">İptal</button>
+      <button class="btn btn-primary" onclick="saveArac()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- SATIŞ MODAL -->
+<div class="overlay" id="satis-modal">
+  <div class="modal">
+    <h3>Satış Kaydı</h3>
+    <p id="satis-arac-adi" style="font-size:13px;color:#888;margin-bottom:16px"></p>
+    <input type="hidden" id="satis-arac-id">
+    <div class="form-grid">
+      <div class="form-group"><label>Satış Fiyatı (₺) *</label><input id="s-fiyat" type="number" oninput="updateKarPreview()"></div>
+      <div class="form-group"><label>Satış Tarihi</label><input id="s-tarih" type="date"></div>
+      <div class="form-group"><label>Müşteri Adı</label><input id="s-musteri-ad" type="text" placeholder="Ad Soyad"></div>
+      <div class="form-group"><label>Müşteri Telefonu</label><input id="s-musteri-tel" type="tel" placeholder="05xx xxx xx xx"></div>
+    </div>
+    <div id="kar-preview" style="display:none;background:#f8f8f4;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;display:flex;gap:16px;flex-wrap:wrap"></div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeSatisModal()">İptal</button>
+      <button class="btn btn-success" onclick="saveSatis()">✓ Satışı Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- MÜŞTERİ MODAL -->
+<div class="overlay" id="musteri-modal">
+  <div class="modal">
+    <h3 id="musteri-modal-title">Yeni Müşteri</h3>
+    <input type="hidden" id="edit-musteri-id">
+    <div class="form-grid">
+      <div class="form-group"><label>Ad *</label><input id="mu-ad" type="text"></div>
+      <div class="form-group"><label>Soyad</label><input id="mu-soyad" type="text"></div>
+      <div class="form-group"><label>Telefon *</label><input id="mu-tel" type="tel" placeholder="05xx xxx xx xx"></div>
+      <div class="form-group"><label>E-posta</label><input id="mu-email" type="email"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Durum</label>
+      <select id="mu-durum"><option value="potansiyel">Potansiyel Müşteri</option><option value="musteri">Müşteri (Satın Aldı)</option></select>
+    </div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Notlar / İlgi Alanı</label>
+      <textarea id="mu-notlar" placeholder="ör: SUV arıyor, bütçe 600K, dizel tercih ediyor..."></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeMusteriModal()">İptal</button>
+      <button class="btn btn-primary" onclick="saveMusteri()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ──────────────── DATA ────────────────
+let araclar = JSON.parse(localStorage.getItem('galeri_araclar') || '[]');
+let musteriler = JSON.parse(localStorage.getItem('galeri_musteriler') || '[]');
+let apiKey = localStorage.getItem('galeri_api_key') || '';
+let filterDurum = 'hepsi';
+let editMasraflar = [];
+
+const today = () => new Date().toISOString().slice(0,10);
+function genId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function saveAraclarLS(){ localStorage.setItem('galeri_araclar', JSON.stringify(araclar)); }
+function saveMusterilerLS(){ localStorage.setItem('galeri_musteriler', JSON.stringify(musteriler)); }
+
+function fmt(v){ return new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:0}).format(v||0); }
+function fmtNum(v){ return parseInt(v||0).toLocaleString('tr-TR'); }
+
+function getAracMaliyet(a){
+  const m = (a.masraflar||[]).reduce((s,x)=>s+parseFloat(x.tutar||0),0);
+  return parseFloat(a.alisFiyati||0)+m;
+}
+
+// ──────────────── TABS ────────────────
+function switchTab(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  event.target.classList.add('active');
+  if(name==='ozet') renderOzet();
+  if(name==='araclar') renderAraclar();
+  if(name==='musteriler') renderMusteriler();
+  if(name==='degerlendir') initApiKey();
+}
+
+// ──────────────── ÖZET ────────────────
+function renderOzet(){
+  const stokta = araclar.filter(a=>a.durum==='stokta');
+  const satildi = araclar.filter(a=>a.durum==='satildi');
+  const toplamGelir = satildi.reduce((s,a)=>s+parseFloat(a.satisFiyati||0),0);
+  const satMaliyet = satildi.reduce((s,a)=>s+getAracMaliyet(a),0);
+  const netKar = toplamGelir - satMaliyet;
+  const stokMaliyet = stokta.reduce((s,a)=>s+getAracMaliyet(a),0);
+
+  document.getElementById('stat-grid').innerHTML = [
+    ['Stokta',stokta.length+' araç','blue'],
+    ['Satıldı',satildi.length+' araç','green'],
+    ['Toplam Gelir',fmt(toplamGelir),'green'],
+    ['Net Kâr',fmt(netKar), netKar>=0?'green':'red'],
+    ['Stok Maliyeti',fmt(stokMaliyet),'amber'],
+  ].map(([l,v,c])=>`<div class="stat-card"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v}</div></div>`).join('');
+
+  const son = [...araclar].reverse().slice(0,6);
+  document.getElementById('son-islemler').innerHTML = son.length===0
+    ? '<div class="empty"><div class="empty-icon">🚗</div>Henüz araç eklenmemiş.<br>Araçlar sekmesinden başlayın.</div>'
+    : son.map(a=>{
+        const mal = getAracMaliyet(a);
+        const kar = a.durum==='satildi' ? parseFloat(a.satisFiyati||0)-mal : null;
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:#f8f8f4;border-radius:8px;margin-bottom:6px;gap:8px">
+          <div><strong style="font-size:13px">${a.marka} ${a.model}</strong> <span style="font-size:12px;color:#888">${a.yil} · ${fmtNum(a.km)} km</span></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            ${kar!==null?`<span style="font-size:12px;font-weight:600;color:${kar>=0?'#15803d':'#dc2626'}">${kar>=0?'+':''}${fmt(kar)}</span>`:''}
+            <span class="badge ${a.durum==='stokta'?'badge-blue':'badge-green'}">${a.durum==='stokta'?'Stokta':'Satıldı'}</span>
+          </div>
+        </div>`;
+      }).join('');
+
+  const ozCard = document.getElementById('satis-ozet-card');
+  if(satildi.length>0){
+    ozCard.style.display='block';
+    const margin = toplamGelir>0 ? Math.round((netKar/toplamGelir)*100) : 0;
+    const avgKar = satildi.length>0 ? Math.round(netKar/satildi.length) : 0;
+    document.getElementById('satis-ozet-grid').innerHTML = [
+      ['Satış Maliyeti',fmt(satMaliyet),'gray'],
+      ['Kâr Marjı','%'+margin,(margin>=0?'green':'red')],
+      ['Ort. Araç Kârı',fmt(avgKar),(avgKar>=0?'green':'red')],
+    ].map(([l,v,c])=>`<div class="stat-card"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v}</div></div>`).join('');
+  } else { ozCard.style.display='none'; }
+}
+
+// ──────────────── ARAÇLAR ────────────────
+function setFilter(val, btn){
+  filterDurum = val;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAraclar();
+}
+
+function renderAraclar(){
+  const list = filterDurum==='hepsi' ? araclar : araclar.filter(a=>a.durum===filterDurum);
+  const el = document.getElementById('arac-list');
+  if(list.length===0){ el.innerHTML='<div class="empty"><div class="empty-icon">🚗</div>Araç bulunamadı.</div>'; return; }
+  el.innerHTML = list.map(a=>{
+    const masrafTopla = (a.masraflar||[]).reduce((s,m)=>s+parseFloat(m.tutar||0),0);
+    const maliyet = getAracMaliyet(a);
+    const kar = a.durum==='satildi' ? parseFloat(a.satisFiyati||0)-maliyet : null;
+    const masrafStr = (a.masraflar||[]).length>0 ? `<div style="font-size:11px;color:#aaa;margin-top:4px">${a.masraflar.map(m=>`${m.aciklama} (${fmt(m.tutar)})`).join(' · ')}</div>` : '';
+    const satisActions = a.durum==='stokta'
+      ? `<button class="btn btn-sm btn-success" onclick="openSatisModal('${a.id}')">Satış Yap</button>` : '';
+    return `<div class="arac-row">
+      <div class="arac-row-top">
+        <div class="arac-info">
+          <h3>${a.marka} ${a.model} <span style="font-size:12px;font-weight:400;color:#888">${a.yil}</span>
+            <span class="badge ${a.durum==='stokta'?'badge-blue':'badge-green'}">${a.durum==='stokta'?'Stokta':'Satıldı'}</span>
+          </h3>
+          <div class="arac-meta">${fmtNum(a.km)} km · ${a.yakit||'–'} · ${a.vites||'–'}${a.renk?' · '+a.renk:''}</div>
+          <div class="arac-prices">
+            <span>Alış: <strong>${fmt(a.alisFiyati)}</strong></span>
+            ${masrafTopla>0?`<span>Masraf: <strong>${fmt(masrafTopla)}</strong></span>`:''}
+            <span>Maliyet: <strong>${fmt(maliyet)}</strong></span>
+            ${a.durum==='satildi'?`<span>Satış: <strong>${fmt(a.satisFiyati)}</strong></span>`:''}
+            ${kar!==null?`<span style="font-weight:700;color:${kar>=0?'#15803d':'#dc2626'}">Kâr: ${kar>=0?'+':''}${fmt(kar)}</span>`:''}
+          </div>
+          ${masrafStr}
+          ${a.durum==='satildi'&&a.musteriAd?`<div style="font-size:12px;color:#888;margin-top:4px">Müşteri: ${a.musteriAd}${a.musteriTel?' · '+a.musteriTel:''}</div>`:''}
+          ${a.notlar?`<div style="font-size:12px;color:#aaa;margin-top:4px;font-style:italic">${a.notlar}</div>`:''}
+        </div>
+        <div class="arac-actions">
+          ${satisActions}
+          <button class="btn btn-sm" onclick="openAracForm('${a.id}')">Düzenle</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteArac('${a.id}')">Sil</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── ARAÇ FORM ──
+function openAracForm(id){
+  editMasraflar = [];
+  if(id){
+    const a = araclar.find(x=>x.id===id);
+    if(!a) return;
+    document.getElementById('arac-modal-title').textContent='Aracı Düzenle';
+    document.getElementById('edit-arac-id').value=id;
+    document.getElementById('f-marka').value=a.marka||'';
+    document.getElementById('f-model').value=a.model||'';
+    document.getElementById('f-yil').value=a.yil||'';
+    document.getElementById('f-km').value=a.km||'';
+    document.getElementById('f-renk').value=a.renk||'';
+    document.getElementById('f-alis').value=a.alisFiyati||'';
+    document.getElementById('f-alis-tarih').value=a.alisTarihi||today();
+    document.getElementById('f-yakit').value=a.yakit||'Benzin';
+    document.getElementById('f-vites').value=a.vites||'Manuel';
+    document.getElementById('f-notlar').value=a.notlar||'';
+    editMasraflar = JSON.parse(JSON.stringify(a.masraflar||[]));
+  } else {
+    document.getElementById('arac-modal-title').textContent='Yeni Araç';
+    document.getElementById('edit-arac-id').value='';
+    ['f-marka','f-model','f-km','f-renk','f-alis','f-notlar'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f-yil').value=new Date().getFullYear();
+    document.getElementById('f-alis-tarih').value=today();
+    document.getElementById('f-yakit').value='Benzin';
+    document.getElementById('f-vites').value='Manuel';
+  }
+  renderMasrafListesi();
+  document.getElementById('arac-modal').classList.add('open');
+}
+function closeAracModal(){ document.getElementById('arac-modal').classList.remove('open'); }
+
+function renderMasrafListesi(){
+  document.getElementById('masraf-listesi').innerHTML = editMasraflar.map((m,i)=>
+    `<div class="masraf-item"><span>${m.aciklama}</span><strong>${fmt(m.tutar)}</strong>
+    <button class="btn btn-sm btn-danger" style="padding:2px 8px" onclick="removeMasraf(${i})">×</button></div>`
+  ).join('');
+}
+
+function addMasraf(){
+  const a=document.getElementById('m-aciklama').value.trim();
+  const t=document.getElementById('m-tutar').value;
+  if(!a||!t) return;
+  editMasraflar.push({aciklama:a,tutar:parseFloat(t)});
+  document.getElementById('m-aciklama').value='';
+  document.getElementById('m-tutar').value='';
+  renderMasrafListesi();
+}
+function removeMasraf(i){ editMasraflar.splice(i,1); renderMasrafListesi(); }
+
+function saveArac(){
+  const marka=document.getElementById('f-marka').value.trim();
+  const model=document.getElementById('f-model').value.trim();
+  const alis=document.getElementById('f-alis').value;
+  if(!marka||!model||!alis){ alert('Marka, model ve alış fiyatı zorunludur.'); return; }
+  const editId=document.getElementById('edit-arac-id').value;
+  const data = {
+    marka, model,
+    yil: document.getElementById('f-yil').value,
+    km: document.getElementById('f-km').value,
+    renk: document.getElementById('f-renk').value,
+    alisFiyati: alis,
+    alisTarihi: document.getElementById('f-alis-tarih').value,
+    yakit: document.getElementById('f-yakit').value,
+    vites: document.getElementById('f-vites').value,
+    notlar: document.getElementById('f-notlar').value,
+    masraflar: JSON.parse(JSON.stringify(editMasraflar)),
+    durum: 'stokta',
+  };
+  if(editId){
+    const idx=araclar.findIndex(a=>a.id===editId);
+    if(idx>=0){ data.id=editId; data.durum=araclar[idx].durum; data.satisFiyati=araclar[idx].satisFiyati; data.satisTarihi=araclar[idx].satisTarihi; data.musteriAd=araclar[idx].musteriAd; data.musteriTel=araclar[idx].musteriTel; araclar[idx]=data; }
+  } else {
+    data.id=genId();
+    araclar.push(data);
+  }
+  saveAraclarLS(); closeAracModal(); renderAraclar();
+}
+
+function deleteArac(id){
+  if(!confirm('Bu aracı silmek istiyor musunuz?')) return;
+  araclar=araclar.filter(a=>a.id!==id); saveAraclarLS(); renderAraclar();
+}
+
+// ── SATIŞ ──
+function openSatisModal(id){
+  const a=araclar.find(x=>x.id===id);
+  if(!a) return;
+  document.getElementById('satis-arac-id').value=id;
+  document.getElementById('satis-arac-adi').textContent=`${a.marka} ${a.model} ${a.yil}`;
+  document.getElementById('s-fiyat').value='';
+  document.getElementById('s-tarih').value=today();
+  document.getElementById('s-musteri-ad').value='';
+  document.getElementById('s-musteri-tel').value='';
+  document.getElementById('kar-preview').style.display='none';
+  document.getElementById('satis-modal').classList.add('open');
+}
+function closeSatisModal(){ document.getElementById('satis-modal').classList.remove('open'); }
+
+function updateKarPreview(){
+  const id=document.getElementById('satis-arac-id').value;
+  const sf=parseFloat(document.getElementById('s-fiyat').value);
+  if(!sf||!id){ document.getElementById('kar-preview').style.display='none'; return; }
+  const a=araclar.find(x=>x.id===id);
+  if(!a) return;
+  const maliyet=getAracMaliyet(a);
+  const kar=sf-maliyet;
+  const prev=document.getElementById('kar-preview');
+  prev.style.display='flex';
+  prev.innerHTML=`<span>Maliyet: <strong>${fmt(maliyet)}</strong></span><span style="font-weight:700;color:${kar>=0?'#15803d':'#dc2626'}">Kâr: ${kar>=0?'+':''}${fmt(kar)}</span>`;
+}
+
+function saveSatis(){
+  const id=document.getElementById('satis-arac-id').value;
+  const sf=document.getElementById('s-fiyat').value;
+  if(!sf){ alert('Satış fiyatı zorunludur.'); return; }
+  const idx=araclar.findIndex(a=>a.id===id);
+  if(idx<0) return;
+  araclar[idx].durum='satildi';
+  araclar[idx].satisFiyati=sf;
+  araclar[idx].satisTarihi=document.getElementById('s-tarih').value;
+  araclar[idx].musteriAd=document.getElementById('s-musteri-ad').value;
+  araclar[idx].musteriTel=document.getElementById('s-musteri-tel').value;
+  saveAraclarLS(); closeSatisModal(); renderAraclar();
+}
+
+// ──────────────── MÜŞTERİLER ────────────────
+function renderMusteriler(){
+  const el=document.getElementById('musteri-list');
+  if(musteriler.length===0){ el.innerHTML='<div class="empty"><div class="empty-icon">👤</div>Henüz müşteri eklenmemiş.</div>'; return; }
+  el.innerHTML=musteriler.map(m=>`
+    <div class="musteri-row">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div class="musteri-avatar">${(m.ad?.[0]||'').toUpperCase()}${(m.soyad?.[0]||'').toUpperCase()}</div>
+        <div class="musteri-info">
+          <h4>${m.ad} ${m.soyad||''}
+            <span class="badge ${m.durum==='potansiyel'?'badge-amber':'badge-green'}">${m.durum==='potansiyel'?'Potansiyel':'Müşteri'}</span>
+          </h4>
+          <p>${m.telefon||''}${m.email?' · '+m.email:''}</p>
+          ${m.notlar?`<p style="margin-top:4px;font-style:italic">${m.notlar}</p>`:''}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+        <button class="btn btn-sm" onclick="openMusteriForm('${m.id}')">Düzenle</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteMusteri('${m.id}')">Sil</button>
+      </div>
+    </div>`).join('');
+}
+
+function openMusteriForm(id){
+  document.getElementById('edit-musteri-id').value=id||'';
+  if(id){
+    const m=musteriler.find(x=>x.id===id);
+    if(!m) return;
+    document.getElementById('musteri-modal-title').textContent='Müşteriyi Düzenle';
+    document.getElementById('mu-ad').value=m.ad||'';
+    document.getElementById('mu-soyad').value=m.soyad||'';
+    document.getElementById('mu-tel').value=m.telefon||'';
+    document.getElementById('mu-email').value=m.email||'';
+    document.getElementById('mu-durum').value=m.durum||'potansiyel';
+    document.getElementById('mu-notlar').value=m.notlar||'';
+  } else {
+    document.getElementById('musteri-modal-title').textContent='Yeni Müşteri';
+    ['mu-ad','mu-soyad','mu-tel','mu-email','mu-notlar'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('mu-durum').value='potansiyel';
+  }
+  document.getElementById('musteri-modal').classList.add('open');
+}
+function closeMusteriModal(){ document.getElementById('musteri-modal').classList.remove('open'); }
+
+function saveMusteri(){
+  const ad=document.getElementById('mu-ad').value.trim();
+  const tel=document.getElementById('mu-tel').value.trim();
+  if(!ad||!tel){ alert('Ad ve telefon zorunludur.'); return; }
+  const editId=document.getElementById('edit-musteri-id').value;
+  const data={ad, soyad:document.getElementById('mu-soyad').value, telefon:tel, email:document.getElementById('mu-email').value, durum:document.getElementById('mu-durum').value, notlar:document.getElementById('mu-notlar').value};
+  if(editId){ const idx=musteriler.findIndex(m=>m.id===editId); if(idx>=0){ data.id=editId; musteriler[idx]=data; } }
+  else{ data.id=genId(); musteriler.push(data); }
+  saveMusterilerLS(); closeMusteriModal(); renderMusteriler();
+}
+function deleteMusteri(id){
+  if(!confirm('Bu müşteriyi silmek istiyor musunuz?')) return;
+  musteriler=musteriler.filter(m=>m.id!==id); saveMusterilerLS(); renderMusteriler();
+}
+
+// ──────────────── API KEY ────────────────
+function initApiKey(){
+  document.getElementById('api-key-input').value=apiKey;
+  if(apiKey) document.getElementById('api-key-saved').style.display='inline';
+}
+function checkApiKey(){
+  document.getElementById('api-key-saved').style.display='none';
+}
+function saveApiKey(){
+  apiKey=document.getElementById('api-key-input').value.trim();
+  localStorage.setItem('galeri_api_key',apiKey);
+  document.getElementById('api-key-saved').style.display='inline';
+}
+
+// ──────────────── AI DEĞERLENDİRME ────────────────
+async function degerlendir(){
+  const marka=document.getElementById('ai-marka').value.trim();
+  const model=document.getElementById('ai-model').value.trim();
+  const yil=document.getElementById('ai-yil').value.trim();
+  const km=document.getElementById('ai-km').value.trim();
+  const fiyat=document.getElementById('ai-fiyat').value.trim();
+  if(!marka||!model||!yil||!km||!fiyat){ alert('Marka, model, yıl, km ve fiyat alanları zorunludur.'); return; }
+  if(!apiKey){ alert('Lütfen önce Anthropic API anahtarınızı girin ve kaydedin.'); return; }
+
+  const yakit=document.getElementById('ai-yakit').value;
+  const vites=document.getElementById('ai-vites').value;
+  const durum=document.getElementById('ai-durum').value;
+  const notlar=document.getElementById('ai-notlar').value.trim();
+
+  const durumlar={hasarsiz:'Hasarsız / Boyasız',kismiboya:'Kısmi Boya',tamponboya:'Tampon Boya',hasarli:'Hasarlı / Değişen Parça Var',agirhasarli:'Ağır Hasarlı'};
+
+  document.getElementById('ai-loading').classList.add('visible');
+  document.getElementById('ai-result').classList.remove('visible');
+
+  const prompt = `Sen Türkiye'deki ikinci el araç piyasasını çok iyi bilen deneyimli bir galericiye danışmanlık yapan uzman bir araç değerlendirme asistanısın.
+
+Aşağıdaki araç hakkında detaylı bir analiz ve değerlendirme yap:
+
+**Araç Bilgileri:**
+- Marka / Model: ${marka} ${model}
+- Yıl: ${yil}
+- Kilometre: ${parseInt(km).toLocaleString('tr-TR')} km
+- Yakıt: ${yakit}
+- Vites: ${vites}
+- Araç Durumu: ${durumlar[durum]}
+- İstenen Satış Fiyatı: ${parseInt(fiyat).toLocaleString('tr-TR')} TL
+${notlar?'- Ek Bilgiler: '+notlar:''}
+
+Lütfen aşağıdaki JSON formatında yanıt ver (başka hiçbir şey yazma, sadece JSON):
+
+{
+  "karar": "AL" | "MUZAKERE_ET" | "ALMA",
+  "karar_aciklama": "Kararın kısa özeti (1-2 cümle)",
+  "piyasa_analizi": "Bu araç için Türkiye ikinci el piyasasındaki gerçekçi fiyat aralığı ve mevcut durumla karşılaştırma (3-4 cümle)",
+  "tahmini_piyasa_fiyati_min": 450000,
+  "tahmini_piyasa_fiyati_max": 550000,
+  "puan_fiyat": 75,
+  "puan_km": 80,
+  "puan_durum": 90,
+  "puan_genel": 78,
+  "guclu_yonler": "Araçın olumlu özellikleri (3-5 madde, her madde tire ile başlasın)",
+  "riskler": "Potansiyel riskler ve dikkat edilmesi gerekenler (3-5 madde, her madde tire ile başlasın)",
+  "muzakere_onerisi": "Galericinin müzakerede ne kadar indirim talep etmesi gerektiği, hangi argümanları kullanabileceği (2-3 cümle)",
+  "genel_tavsiye": "Sonuç olarak bu aracı almalı mı? Açık ve net bir tavsiye (2-3 cümle)"
+}
+
+Puanlar 0-100 arası olacak (100 = mükemmel). Türkiye piyasasını ve güncel enflasyonu göz önünde bulundur.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if(!response.ok){
+      const err=await response.json();
+      throw new Error(err.error?.message || 'API hatası: '+response.status);
+    }
+
+    const data = await response.json();
+    const text = data.content[0].text.trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('Geçersiz yanıt formatı');
+    const result = JSON.parse(jsonMatch[0]);
+    showAiResult(result, marka, model, yil, fiyat);
+  } catch(e){
+    alert('Hata: '+e.message+'\n\nLütfen API anahtarınızı kontrol edin.');
+  } finally {
+    document.getElementById('ai-loading').classList.remove('visible');
+  }
+}
+
+function showAiResult(r, marka, model, yil, fiyat){
+  const verdictMap = {
+    'AL': { cls:'verdict-al', icon:'✅', text:'ALIM FIRSATI — Araç değerinde veya altında' },
+    'MUZAKERE_ET': { cls:'verdict-musait', icon:'🤝', text:'MÜZAKERENİN TAM ZAMANI — Fiyat indirilebilir' },
+    'ALMA': { cls:'verdict-alma', icon:'❌', text:'ALMA TAVSİYE EDİLMEZ — Riskli veya pahalı' },
+  };
+  const v = verdictMap[r.karar] || verdictMap['MUZAKERE_ET'];
+
+  document.getElementById('ai-verdict-box').innerHTML = `
+    <div class="ai-verdict ${v.cls}">
+      <span style="font-size:24px">${v.icon}</span>
+      <div>
+        <div>${v.text}</div>
+        <div style="font-weight:400;font-size:12px;margin-top:3px">${r.karar_aciklama||''}</div>
+      </div>
+    </div>`;
+
+  const minF = r.tahmini_piyasa_fiyati_min||0;
+  const maxF = r.tahmini_piyasa_fiyati_max||0;
+  const fark = parseInt(fiyat) - Math.round((minF+maxF)/2);
+  const farkStr = fark>0 ? `<span style="color:#dc2626">Piyasa ortalamasının <strong>${parseInt(fiyat-Math.round((minF+maxF)/2)).toLocaleString('tr-TR')} TL üzerinde</strong></span>`
+    : fark<0 ? `<span style="color:#15803d">Piyasa ortalamasının <strong>${Math.abs(fark).toLocaleString('tr-TR')} TL altında</strong> — iyi fırsat!</span>`
+    : `<span style="color:#888">Piyasa ortalamasına uygun</span>`;
+
+  document.getElementById('ai-piyasa').innerHTML = `
+    ${r.piyasa_analizi||''}
+    <div style="margin-top:10px;padding:10px 14px;background:#f8f8f4;border-radius:8px;font-size:13px">
+      <div><strong>Tahmini piyasa değeri:</strong> ${minF.toLocaleString('tr-TR')} TL – ${maxF.toLocaleString('tr-TR')} TL</div>
+      <div style="margin-top:4px"><strong>İstenen fiyat:</strong> ${parseInt(fiyat).toLocaleString('tr-TR')} TL &nbsp;|&nbsp; ${farkStr}</div>
+    </div>`;
+
+  const puanlar = [
+    ['Fiyat Uygunluğu', r.puan_fiyat||0],
+    ['Kilometre Durumu', r.puan_km||0],
+    ['Araç Durumu', r.puan_durum||0],
+    ['Genel Puan', r.puan_genel||0],
+  ];
+  document.getElementById('ai-puanlar').innerHTML = puanlar.map(([label, puan])=>{
+    const color = puan>=70?'#15803d':puan>=50?'#b45309':'#dc2626';
+    return `<div class="score-row">
+      <div class="score-label">${label}</div>
+      <div class="score-bar-wrap"><div class="score-bar" style="width:${puan}%;background:${color}"></div></div>
+      <div class="score-num" style="color:${color}">${puan}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('ai-guclu').innerHTML = (r.guclu_yonler||'').replace(/\n?- /g,'<br>• ').replace(/^<br>/,'');
+  document.getElementById('ai-risk').innerHTML = (r.riskler||'').replace(/\n?- /g,'<br>• ').replace(/^<br>/,'');
+  document.getElementById('ai-muzakere').textContent = r.muzakere_onerisi||'';
+  document.getElementById('ai-tavsiye').textContent = r.genel_tavsiye||'';
+
+  document.getElementById('ai-result').classList.add('visible');
+  document.getElementById('ai-result').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ──────────────── OVERLAY CLICK ────────────────
+['arac-modal','satis-modal','musteri-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click', function(e){
+    if(e.target===this) this.classList.remove('open');
+  });
+});
+
+// ──────────────── INIT ────────────────
+renderOzet();
+renderAraclar();
+</script>
+</body>
+</html>
